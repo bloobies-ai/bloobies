@@ -37,9 +37,10 @@ Then open [bloobies.ai](https://bloobies.ai) and sign in. It finds your agents b
 
 ## What it runs, reads and sends
 
-In short: a small bridge runs on your machine, listens on `127.0.0.1` only, and streams what your agents are doing
-to your bloobies.ai tab. Your prompts, code, file contents and keys stay on your machine. The plugin sends nothing
-to bloobies.ai's servers.
+In short: a small bridge runs on your machine and listens on `127.0.0.1` only. Once you link this computer to your
+account, it sends a stripped-down picture of your crew (who works, in what state, at which station) to your own
+private channel, so your bloobies.ai tab can show it on any device. Your prompts, code, file names, paths, commands
+and keys stay on your machine.
 
 ### What it runs
 
@@ -49,8 +50,10 @@ to bloobies.ai's servers.
 - **On every other hook event**, `scripts/hook.mjs` runs in the background, so it never slows Claude Code down. It
   passes the hook's JSON to the bridge at `http://127.0.0.1:5318/hook`, and does nothing else. If no bridge is
   running, it quietly exits.
-- **Once, the first time**, if no bloobies.ai tab has connected within 8 seconds, the bridge opens
-  `https://bloobies.ai` in your browser. It notes that it did (in the plugin's data folder) and never does it again.
+- **To link this computer**, the first time, the bridge asks bloobies.ai for a one-time code and opens
+  `https://bloobies.ai/#link=CODE` in your browser (at most once a day until you link it). Nothing is sent until you
+  click "Link this computer" there. The bridge then gets a key for your account, which it keeps in the plugin's data
+  folder.
 - **It never starts agents on its own.** The bridge can start a Claude Code, Codex or Cursor run only when asked by a
   page that holds the bridge's private token. The plugin never gives that token to bloobies.ai, so from bloobies.ai
   you watch, and you direct your agents in Claude Code itself.
@@ -71,20 +74,35 @@ to bloobies.ai's servers.
 
 ### What it writes
 
-- **The plugin's data folder:** `bridge.log`, and the marker that bloobies.ai was opened once.
+- **The plugin's data folder:** `bridge.log`, `relay.json` (this computer's key, readable only by you), and the
+  date the link page was last opened.
 - **`~/.bloobies`:** a list of recent project folders, and the hook and MCP settings files that runs started by the
   bridge use.
 - **It never changes your Claude Code settings or permissions.**
 
 ### What it sends, and to whom
 
-- **World events go to pages connected to the bridge**, over a WebSocket on `127.0.0.1`. Those pages are open in your
-  own browser, so the events travel from your machine to your tab, not through bloobies.ai's servers.
-- **Who can connect:** only pages from `https://bloobies.ai` and pages served from this machine. Any other website is
+- **To your private channel, once linked.** The bridge sends the world's events to a private channel that only your
+  account can open, on [Supabase](https://supabase.com) Realtime, which bloobies.ai uses to carry them. It sends only
+  while one of your bloobies.ai tabs is open and in view, at most one batch every two seconds. Before anything leaves
+  this machine (`bridge/relay.mjs`), each event is cut down to:
+  - agents: a random id, the bloobie's name, whether it leads, and a helper's role;
+  - tasks: a random id, the station, and the station's verb as the label ("Building"), never your prompt's words;
+  - states: working, idle, waiting for you ("Wants approval" or "Has a question", never the question itself), done,
+    stopped, and progress counts;
+  - the context meter, and your plan's limits as percentages with their reset times.
+
+  Never sent: prompts, messages, file names, paths, commands, error text, session ids, or your project folder's name.
+  bloobies.ai's servers don't store these events; the channel passes them to your tab and keeps nothing.
+- **To pages on this machine**, over a WebSocket on `127.0.0.1`, in full (with task labels and messages), since
+  they never leave it.
+- **Who can connect to the bridge:** only pages from `https://bloobies.ai` and pages served from this machine. Any other website is
   refused.
   - A bloobies.ai page can only watch. It can't start, direct or answer agents, and it never sees your folder list.
   - Directing takes the bridge's token, which only a link made on this machine carries.
-- **The website itself** keeps your account (your GitHub id and name) and your plan's time. While your tab is open
+- **To unlink:** delete `relay.json` from the plugin's data folder, or unlink your computers from your account.
+- **The website itself** keeps your account (your GitHub id and name), your linked computers' keys (hashed), and your
+  plan's time. While your tab is open
   it tells bloobies.ai whether any agent is working, to count trial time. That's the website, not this plugin; see
   the [Terms](https://bloobies.ai/?view=terms).
 

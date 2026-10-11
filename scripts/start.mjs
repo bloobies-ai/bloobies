@@ -27,7 +27,7 @@ try {
     const log = fs.openSync(path.join(data, 'bridge.log'), 'a')
     const child = spawn(
       process.execPath,
-      [path.join(root, 'bridge', 'cli.mjs'), 'start', '--port', String(PORT), '--idle-exit', '30', '--open-once', path.join(data, 'opened')],
+      [path.join(root, 'bridge', 'cli.mjs'), 'start', '--port', String(PORT), '--idle-exit', '30', '--open-once', path.join(data, 'opened'), '--relay', 'https://bloobies.ai', '--relay-dir', data],
       { detached: true, stdio: ['ignore', log, log], windowsHide: true, cwd: os.homedir() },
     )
     child.unref()

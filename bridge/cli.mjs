@@ -17,7 +17,7 @@ import { exec } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { startBridge } from './server.mjs'
 import { runMcp } from './mcp.mjs'
-import { claudeSettings, writeRunFiles } from './connect.mjs'
+import { claudeSettings, home, writeRunFiles } from './connect.mjs'
 import { findPrograms } from './find.mjs'
 
 const args = process.argv.slice(2)
@@ -73,6 +73,28 @@ if (cmd === 'mcp') {
     process.exit(1)
   })
   const files = writeRunFiles(bridge.port)
+  // --relay SITE: also send the world (sanitized) to your private channel, so SITE shows it without reaching this machine
+  const relaySite = opt('relay', null)
+  if (relaySite) {
+    let ok = false
+    try {
+      const u = new URL(relaySite)
+      ok = u.protocol === 'https:' || /^(127\.0\.0\.1|localhost)$/.test(u.hostname)
+    } catch {}
+    if (!ok) {
+      console.error(`--relay takes https://bloobies.ai (or a local dev server), not ${relaySite}`)
+      process.exit(1)
+    }
+    const { startRelay } = await import('./relay.mjs')
+    startRelay({
+      site: relaySite.replace(/\/$/, ''),
+      dir: path.resolve(opt('relay-dir', home())),
+      listen: bridge.listen,
+      snapshot: () => bridge.tracker.snapshot(),
+      open: openUrl,
+      log: (l) => console.log(`  · ${l}`),
+    })
+  }
   const q = `view=world&live=1&token=${bridge.token}`
   const page = `http://127.0.0.1:${bridge.port}/?${q}`
   console.log(`\n  bloobies bridge · listening on 127.0.0.1:${bridge.port} (this machine only)\n`)
@@ -91,7 +113,8 @@ if (cmd === 'mcp') {
   const quit = () => bridge.close().then(() => process.exit(0))
   // --open-once FILE: the first time ever (no FILE yet), open your world, unless a page found the bridge by itself
   const once = opt('open-once', null)
-  if (once && origins.includes(HOSTED) && !fs.existsSync(once))
+  // (with the relay, linking this computer opens the world instead)
+  if (once && !relaySite && origins.includes(HOSTED) && !fs.existsSync(once))
     setTimeout(() => {
       if (fs.existsSync(once)) return
       fs.writeFileSync(once, new Date().toISOString())

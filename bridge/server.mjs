@@ -74,6 +74,8 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
   const tracker = new Tracker()
   let events = 0
 
+  /** Who else hears every event (the hosted relay, relay.mjs). */
+  const listeners = new Set()
   const publish = (e) => {
     const bad = validate(e)
     if (bad) {
@@ -85,6 +87,7 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
     if (verbose) log(`${e.type}${e.agentId ? ' ' + e.agentId : ''}${e.taskId ? ' ' + e.taskId : ''}`)
     const msg = JSON.stringify({ kind: 'events', events: [e] })
     for (const p of peers) p.send(msg)
+    for (const fn of listeners) fn(e)
   }
 
   const claude = new ClaudeAdapter({ emit: publish, readUsage, namesInUse: () => tracker.names(), ...(now && { now }), ...(later && { later }) })
@@ -291,6 +294,7 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
         tracker,
         runs,
         publish,
+        listen: (fn) => listeners.add(fn),
         pages: () => peers.size,
         close: () =>
           new Promise((done) => {
