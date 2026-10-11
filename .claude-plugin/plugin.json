@@ -1,0 +1,17 @@
+{
+  "name": "bloobies",
+  "version": "0.1.0",
+  "description": "Watch your Claude Code agents work as a little crew at bloobies.ai. A small bridge on 127.0.0.1 turns what they do into a live world; your prompts and code stay on your machine.",
+  "author": {
+    "name": "bloobies.ai",
+    "url": "https://bloobies.ai"
+  },
+  "homepage": "https://bloobies.ai",
+  "license": "UNLICENSED",
+  "keywords": [
+    "agents",
+    "visualization",
+    "subagents",
+    "dashboard"
+  ]
+}

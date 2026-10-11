@@ -1,0 +1,215 @@
+{
+  "description": "bloobies: start the local bridge, and show this session in your world",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/start.mjs"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:5318/hook",
+            "timeout": 2,
+            "headers": {
+              "X-Bloobies": "hook"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

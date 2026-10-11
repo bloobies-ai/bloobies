@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bloobies.ai/protocol/v1/event.json",
+  "title": "bloobies event (protocol v1)",
+  "description": "One event in the stream a bloobies world is reduced from. See index.d.ts for what each one means.",
+  "version": 1,
+  "$defs": {
+    "t": { "type": "number", "description": "Milliseconds (wall time from the bridge)." },
+    "id": { "type": "string", "minLength": 1 },
+    "station": { "enum": ["build", "research", "test", "review", "ship", "design"] },
+    "label": { "type": "string", "maxLength": 60 }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "agent.spawned" },
+        "t": { "$ref": "#/$defs/t" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "lead": { "type": "boolean" },
+        "role": { "type": "string", "maxLength": 40 }
+      },
+      "required": ["type", "t", "agentId", "name"]
+    },
+    {
+      "type": "object",
+      "properties": { "type": { "const": "agent.retired" }, "t": { "$ref": "#/$defs/t" }, "agentId": { "$ref": "#/$defs/id" } },
+      "required": ["type", "t", "agentId"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.assigned" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "station": { "$ref": "#/$defs/station" },
+        "label": { "$ref": "#/$defs/label" },
+        "total": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["type", "t", "taskId", "agentId", "station", "label"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.status" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "label": { "$ref": "#/$defs/label" },
+        "detail": { "type": "string", "maxLength": 120 },
+        "station": { "$ref": "#/$defs/station" },
+        "eta": { "type": "number", "minimum": 0, "description": "The agent's own estimate, seconds left." }
+      },
+      "required": ["type", "t", "taskId", "label"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.progress" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "done": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["type", "t", "taskId", "done", "total"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.handoff" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "from": { "$ref": "#/$defs/id" },
+        "to": { "$ref": "#/$defs/id" },
+        "station": { "$ref": "#/$defs/station" },
+        "label": { "$ref": "#/$defs/label" },
+        "total": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["type", "t", "taskId", "from", "to", "station", "label"]
+    },
+    {
+      "type": "object",
+      "properties": { "type": { "const": "task.done" }, "t": { "$ref": "#/$defs/t" }, "taskId": { "$ref": "#/$defs/id" } },
+      "required": ["type", "t", "taskId"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.paused" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "paused": { "type": "boolean" }
+      },
+      "required": ["type", "t", "taskId", "paused"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.file" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "op": { "enum": ["read", "edit", "create"] }
+      },
+      "required": ["type", "t", "taskId", "path", "op"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "task.failed" },
+        "t": { "$ref": "#/$defs/t" },
+        "taskId": { "$ref": "#/$defs/id" },
+        "reason": { "type": "string", "maxLength": 60 },
+        "kind": { "enum": ["error", "blocked"] }
+      },
+      "required": ["type", "t", "taskId", "reason"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "agent.needs_input" },
+        "t": { "$ref": "#/$defs/t" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["permission", "question"] },
+        "text": { "type": "string", "maxLength": 120 }
+      },
+      "required": ["type", "t", "agentId", "kind", "text"]
+    },
+    {
+      "type": "object",
+      "properties": { "type": { "const": "agent.idle" }, "t": { "$ref": "#/$defs/t" }, "agentId": { "$ref": "#/$defs/id" } },
+      "required": ["type", "t", "agentId"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "agent.usage" },
+        "t": { "$ref": "#/$defs/t" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "context": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tokens": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["type", "t", "agentId", "context"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "agent.said" },
+        "t": { "$ref": "#/$defs/t" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "from": { "enum": ["agent", "you"] },
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "description": "The same id replaces the earlier message in place." },
+        "state": { "enum": ["queued", "sent", "dropped"], "description": "For from: you only." },
+        "final": { "type": "boolean", "description": "The agent's turn ended with this message." }
+      },
+      "required": ["type", "t", "agentId", "text"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "limits.update" },
+        "t": { "$ref": "#/$defs/t" },
+        "service": { "enum": ["claude", "codex"] },
+        "h5": { "type": "number", "minimum": 0, "maximum": 100, "description": "Percent of the 5-hour window used." },
+        "h5Reset": { "type": "number", "description": "When the 5-hour window resets (epoch ms)." },
+        "wk": { "type": "number", "minimum": 0, "maximum": 100, "description": "Percent of the weekly window used." },
+        "wkReset": { "type": "number", "description": "When the weekly window resets (epoch ms)." }
+      },
+      "required": ["type", "t", "service"]
+    }
+  ]
+}
