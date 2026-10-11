@@ -2,7 +2,7 @@
 
 Watch your Claude Code agents work as a little crew at [bloobies.ai](https://bloobies.ai).
 
-![A crew of bloobies at work: build, research, test, review, ship and design stations around a tree, with the usage board behind](media/crew.gif)
+![A crew of bloobies at work: build, research, test, review, ship and design stations around a tree, with the usage board behind](https://bloobies.ai/media/crew.gif)
 
 ## Install
 

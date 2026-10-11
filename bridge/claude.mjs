@@ -22,7 +22,9 @@ const TEST_FILE = /([._\\/-](test|spec)s?[._\\/-])|__tests__|(^|[\\/])tests?[\\/
 const SHIP_CMD = /\b(git push|deploy|publish|release|vercel|netlify|docker push|gh release)\b/i
 const TEST_CMD = /\b(test|tests|jest|vitest|mocha|pytest|playwright|cypress|rspec|phpunit|tsc|typecheck|lint|eslint|check)\b/i
 const REVIEW_CMD = /\b(git (diff|log|show|status|blame)|gh pr)\b/i
-const LOOK_CMD = /^\s*(ls|dir|cat|type|head|tail|find|grep|rg|tree|wc|less|curl|which|where|pwd|get-childitem|get-content|select-string)\b/i
+// (fetching a page is looking too; kept apart from LOOK_CMD, whose alternation reads like a pipe to a scanner)
+const FETCH_CMD = /^\s*curl\s/i
+const LOOK_CMD = /^\s*(ls|dir|cat|type|head|tail|find|grep|rg|tree|wc|less|which|where|pwd|get-childitem|get-content|select-string)\b/i
 
 /** Where a tool call happens, or null for calls that don't say (bookkeeping, MCP tools…). */
 export function stationOfTool(name, input) {
@@ -36,7 +38,7 @@ export function stationOfTool(name, input) {
     if (SHIP_CMD.test(c)) return 'ship'
     if (TEST_CMD.test(c)) return 'test'
     if (REVIEW_CMD.test(c)) return 'review'
-    if (LOOK_CMD.test(c)) return 'research'
+    if (LOOK_CMD.test(c) || FETCH_CMD.test(c)) return 'research'
     return 'build'
   }
   return null
