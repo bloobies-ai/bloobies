@@ -20,6 +20,10 @@ To see your Claude plan's usage (5-hour and weekly) on the world's board, run th
 /bloobies:usage
 ```
 
+Claude Code passes your plan's usage only to its status line, so this works where the status line runs: Claude Code
+in a terminal (Pro and Max plans). The Claude desktop app shows your usage itself and doesn't run status lines, so
+there the board's Claude row stays empty.
+
 ## What you get
 
 <table>

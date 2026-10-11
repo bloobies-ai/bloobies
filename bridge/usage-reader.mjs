@@ -62,7 +62,7 @@ function main() {
   save({ ...settings, statusLine: { ...(sl?.type === 'command' ? sl : {}), type: 'command', command } })
   return (
     (yours ? 'Usage reader on: your status line is kept and runs through it.' : 'Usage reader on: a status line shows your model and plan usage.') +
-    " Your Claude plan's usage reaches the bloobies board after Claude's next reply (Pro and Max plans). Undo: /bloobies:usage off"
+    " Your Claude plan's usage reaches the bloobies board after Claude's next reply in a terminal session (Pro and Max plans; the desktop app doesn't run status lines). Undo: /bloobies:usage off"
   )
 }
 
