@@ -14,6 +14,12 @@ In Claude Code:
 
 Then open [bloobies.ai](https://bloobies.ai) and sign in. It finds your agents by itself.
 
+To see your Claude plan's usage (5-hour and weekly) on the world's board, run this once in Claude Code:
+
+```
+/bloobies:usage
+```
+
 ## What you get
 
 <table>
@@ -78,7 +84,11 @@ and keys stay on your machine.
   date the link page was last opened.
 - **`~/.bloobies`:** a list of recent project folders, and the hook and MCP settings files that runs started by the
   bridge use.
-- **It never changes your Claude Code settings or permissions.**
+- **It never changes your Claude Code settings or permissions**, except your status line, and only when you run
+  `/bloobies:usage`. Claude Code gives your plan's usage only to the status line command, so that sets it to
+  `~/.bloobies/statusline.mjs` (a copy of `bridge/statusline.mjs`). A status line you already have keeps running
+  through it and still shows. It keeps only the two percentages and their reset times, in
+  `~/.bloobies/claude-limits.json`, and backs up `settings.json` first. `/bloobies:usage off` puts it all back.
 
 ### What it sends, and to whom
 
