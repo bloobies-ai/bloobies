@@ -19,12 +19,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -33,12 +34,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -47,12 +49,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -61,12 +64,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -75,12 +79,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -89,12 +94,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -103,12 +109,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -117,12 +124,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -131,12 +139,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -145,12 +154,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -159,12 +169,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -173,12 +184,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -187,12 +199,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -201,12 +214,13 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "http://127.0.0.1:5318/hook",
-            "timeout": 2,
-            "headers": {
-              "X-Bloobies": "hook"
-            }
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/hook.mjs"
+            ],
+            "async": true,
+            "timeout": 5
           }
         ]
       }

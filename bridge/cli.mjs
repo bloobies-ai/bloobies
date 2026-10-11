@@ -17,7 +17,7 @@ import { exec } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { startBridge } from './server.mjs'
 import { runMcp } from './mcp.mjs'
-import { claudeSettings, install, writeRunFiles } from './setup.mjs'
+import { claudeSettings, writeRunFiles } from './connect.mjs'
 import { findPrograms } from './find.mjs'
 
 const args = process.argv.slice(2)
@@ -39,6 +39,12 @@ if (cmd === 'mcp') {
 } else if (cmd === 'hooks') {
   process.stdout.write(JSON.stringify(claudeSettings(port), null, 2) + '\n')
 } else if (cmd === 'install') {
+  // (not in the Claude Code plugin, which sets its own hooks: there is no setup.mjs there)
+  const { install } = await import('./setup.mjs').catch(() => ({}))
+  if (!install) {
+    console.error('The bloobies plugin sets up Claude Code by itself: nothing to install.')
+    process.exit(1)
+  }
   const scope = flag('user') ? 'user' : path.resolve(opt('project', process.cwd()))
   const { changed, mcpHint, statusNote } = install({ scope, port, remove: flag('remove'), statusLine: !flag('no-statusline') })
   console.log(`${flag('remove') ? 'Removed bloobies from' : 'Added bloobies to'}:\n${changed.map((f) => `  ${f}`).join('\n')}`)

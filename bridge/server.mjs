@@ -16,7 +16,7 @@ import { ClaudeAdapter } from './claude.mjs'
 import { Tracker } from './tracker.mjs'
 import { readUsage } from './usage.mjs'
 import { readLimits } from './limits.mjs'
-import { home as defaultHome } from './setup.mjs'
+import { home as defaultHome } from './connect.mjs'
 import { validate } from './validate.mjs'
 import { Runs } from './runs.mjs'
 import { findPrograms } from './find.mjs'
@@ -65,7 +65,7 @@ const same = (a, b) => {
  * @param {string[]} [o.folders] folders to offer in the launch form
  * @param {string} [o.home]      where run files live (default ~/.bloobies)
  * @param {string[]} [o.origins] https page origins that may also open the stream (e.g. https://bloobies.ai), besides
- *                               loopback pages. Exact matches only. These need no token: a browser always sends
+ *                               loopback pages. Exact matches only. These need no token to watch: a browser always sends
  *                               the page's real Origin, so only that site's pages get in (and the hosted world can
  *                               find the bridge by itself). Loopback pages and scripts still need the token.
  */
@@ -95,6 +95,11 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
     const text = JSON.stringify(msg)
     for (const p of peers) p.send(text)
   }
+  /** To the pages that may direct (the run list carries this machine's folders: watch-only pages never get it). */
+  const toDirectors = (msg) => {
+    const text = JSON.stringify(msg)
+    for (const p of peers) if (!p.watch) p.send(text)
+  }
   const runs = new Runs({
     claude,
     publish,
@@ -103,12 +108,12 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
     folders,
     port: () => actualPort,
     log,
-    changed: () => broadcast({ kind: 'runs', runs: runs.list() }),
+    changed: () => toDirectors({ kind: 'runs', runs: runs.list() }),
     ...(now && { now }),
     ...(home && { dir: home }),
   })
 
-  /** A command from the page (it holds the token: the socket was checked when it opened). */
+  /** A command from the page. Only a page holding the token may direct: a watch-only page is told no. */
   const command = (peer, raw) => {
     let m
     try {
@@ -118,6 +123,7 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
     }
     if (m?.kind !== 'cmd' || !COMMANDS.has(m.cmd)) return
     const answer = (r) => peer.send(JSON.stringify({ kind: 'reply', id: m.id, ok: !!r.ok, text: String(r.text ?? '') }))
+    if (peer.watch) return answer({ ok: false, text: 'This page only watches: direct your agents in Claude Code' })
     const id = typeof m.agentId === 'string' ? m.agentId : ''
     let r
     try {
@@ -227,19 +233,23 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
   server.on('upgrade', (req, socket) => {
     const url = new URL(req.url ?? '/', 'http://127.0.0.1')
     const origin = req.headers.origin
+    // An allowed site (bloobies.ai) may watch without the token, since a browser always sends the page's real Origin.
+    // Directing agents (starting runs, assigning, answering) takes the token, which only reaches a page through a
+    // link made on this machine: a hosted page, even a compromised one, can't start anything on its own.
     const site = !!origin && origins.includes(origin)
-    const keyed = (!origin || LOOPBACK_ORIGIN.test(origin)) && same(url.searchParams.get('token') ?? '', token)
+    const keyed = (!origin || LOOPBACK_ORIGIN.test(origin) || site) && same(url.searchParams.get('token') ?? '', token)
     if (!local(req) || url.pathname !== '/ws' || !(site || keyed)) {
       socket.end('HTTP/1.1 403 Forbidden\r\n\r\n')
       return
     }
     const peer = accept(req, socket)
     if (!peer) return socket.destroy()
+    peer.watch = !keyed
     peers.add(peer)
     peer.onclose = () => peers.delete(peer)
     peer.onmessage = (text) => command(peer, text)
-    peer.send(JSON.stringify({ kind: 'hello', protocol: PROTOCOL_VERSION, now: Date.now(), can: runs.info() }))
-    peer.send(JSON.stringify({ kind: 'runs', runs: runs.list() }))
+    peer.send(JSON.stringify({ kind: 'hello', protocol: PROTOCOL_VERSION, now: Date.now(), ...(peer.watch ? { watch: true } : { can: runs.info() }) }))
+    if (!peer.watch) peer.send(JSON.stringify({ kind: 'runs', runs: runs.list() }))
     peer.send(JSON.stringify({ kind: 'events', events: tracker.snapshot() }))
   })
 

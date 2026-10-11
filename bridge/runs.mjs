@@ -21,7 +21,7 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto'
 import { command } from './find.mjs'
-import { HOOK_EVENTS, home, mcpConfig } from './setup.mjs'
+import { HOOK_EVENTS, home, mcpConfig } from './connect.mjs'
 import { StreamAgent, codexLine, cursorLine } from './streams.mjs'
 
 /** What each program may be started with, in plain words (shown in the launch form and stated on launch). */
