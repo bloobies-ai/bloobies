@@ -9,7 +9,7 @@ Watch your Claude Code agents work as a little crew at [bloobies.ai](https://blo
 In Claude Code:
 
 ```text
-/plugin install bloobies --marketplace yungprimer/bloobies
+/plugin install bloobies --marketplace bloobies-ai/bloobies
 ```
 
 Then open [bloobies.ai](https://bloobies.ai) and sign in. It finds your agents by itself.
