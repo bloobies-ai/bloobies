@@ -61,7 +61,7 @@ and keys stay on your machine.
   passes the hook's JSON to the bridge at `http://127.0.0.1:5318/hook`, and does nothing else. If no bridge is
   running, it quietly exits.
 - **To link this computer**, the first time, the bridge asks bloobies.ai for a one-time code and opens
-  `https://bloobies.ai/#link=CODE` in your browser (at most once a day until you link it). Nothing is sent until you
+  `https://bloobies.ai/#link=CODE` in your browser (at most once an hour until you link it). Nothing is sent until you
   click "Link this computer" there. The bridge then gets a key for your account, which it keeps in the plugin's data
   folder.
 - **It never starts agents on its own.** The bridge can start a Claude Code, Codex or Cursor run only when asked by a
@@ -75,6 +75,15 @@ and keys stay on your machine.
   station it's at, and a short task label.
 - **The end of each session's transcript** (the last 256 KB of the file Claude Code names in the hook JSON), for the
   context-size meter. Only the token counts are kept, never message text.
+- **The transcripts Claude Code is writing right now** (`~/.claude/projects/*/*.jsonl`, or your `CLAUDE_CONFIG_DIR`),
+  for sessions that were already running when the bridge started: they never loaded these hooks, so they would
+  otherwise be missing from your world. Only files written in the last ten minutes are followed, and each new line
+  becomes the same world event a hook would have made — who is working, at which station, on what. A session whose
+  hooks do reach the bridge is left out of this, so nobody is counted twice. Nothing read here is uploaded: what
+  leaves this machine is the same short list of events, cleaned the same way.
+- **Your Claude Code permission rules** (the `permissions.allow` list in `~/.claude/settings.json` and a project's
+  `.claude/settings.json` / `.claude/settings.local.json`), to tell a tool call that is waiting for your yes from one
+  your own rules already allow. Only the rule strings are read, and they stay on this machine.
 - **Codex's session logs** (`~/.codex/sessions`), for their token-count rows only, to show Codex's limits on the
   usage board.
 - **`~/.bloobies/claude-limits.json`**, if it exists, for your Claude plan's 5-hour and weekly limits. This plugin
