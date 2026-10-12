@@ -16,7 +16,7 @@ const clip = (s, n) => {
 
 /** One bloobie following one CLI run. `emit` is the bridge's publish. */
 export class StreamAgent {
-  constructor({ id, name, role, emit, now = Date.now, cwd }) {
+  constructor({ id, name, role, source, emit, now = Date.now, cwd }) {
     this.id = id
     this.name = name
     this.out = emit
@@ -31,7 +31,7 @@ export class StreamAgent {
     this.movedAt = 0
     this.cand = null
     this.progress = ''
-    this.emit({ type: 'agent.spawned', agentId: id, name, role })
+    this.emit({ type: 'agent.spawned', agentId: id, name, role, source, project: cwd ? clip(path.basename(cwd), 80) : undefined })
   }
 
   emit(e) {

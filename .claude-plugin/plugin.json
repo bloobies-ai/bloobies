@@ -1,7 +1,7 @@
 {
   "name": "bloobies",
   "displayName": "bloobies",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Watch your Claude Code agents work as a little crew at bloobies.ai. A small bridge on 127.0.0.1 turns what they do into a live world; your prompts and code stay on your machine.",
   "author": {
     "name": "bloobies.ai",
@@ -14,9 +14,15 @@
   "termsOfServiceUrl": "https://bloobies.ai/?view=terms",
   "license": "SEE LICENSE IN LICENSE",
   "keywords": [
+    "dashboard",
+    "monitoring",
+    "observability",
     "agents",
+    "multi-agent",
+    "parallel-agents",
+    "hooks",
+    "progress",
     "visualization",
-    "subagents",
-    "dashboard"
+    "subagents"
   ]
 }

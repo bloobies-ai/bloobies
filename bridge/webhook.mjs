@@ -8,6 +8,8 @@
 // Fields (all but `agent` optional, any mix in one message):
 //   agent     your id for it; the first message brings a bloobie in on the bus
 //   name      a display name (otherwise one is picked), role  what kind of agent ("CI", "scraper"…)
+//   source    tool / setup (lowercase letters, digits or hyphens, 1–24 chars; defaults to http)
+//   crew      your id of its lead; project  project folder name (at most 80 chars)
 //   task      starts a new task with this title (ends the one before)
 //   status    a 2–3 word update for the running task, station  where it works (else guessed from the words)
 //   progress  [done, total] or { done, total }, eta  seconds left (the agent's own guess)
@@ -19,6 +21,8 @@ const clip = (s, n) => {
   const t = String(s ?? '').replace(/\s+/g, ' ').trim()
   return t.length > n ? t.slice(0, n - 1) + '…' : t
 }
+
+const agentId = (key) => `wh-${clip(key, 64).replace(/[^\w.-]/g, '_')}`
 
 export class WebhookAdapter {
   /** @param {{ emit: (e: object) => void, now?: () => number, pickName: () => string }} o */
@@ -39,7 +43,10 @@ export class WebhookAdapter {
     if (!m || typeof m !== 'object' || Array.isArray(m)) return 'expected a JSON object'
     const key = clip(m.agent, 64)
     if (!key) return '"agent" (your id for it) is required'
-    const id = `wh-${key.replace(/[^\w.-]/g, '_')}`
+    if (m.source !== undefined && (typeof m.source !== 'string' || !/^[a-z0-9-]{1,24}$/.test(m.source))) return '"source" must be 1–24 lowercase letters, digits or hyphens'
+    if (m.crew !== undefined && (typeof m.crew !== 'string' || !clip(m.crew, 64))) return '"crew" must be the id of its lead'
+    if (m.project !== undefined && (typeof m.project !== 'string' || m.project.length > 80)) return '"project" must be at most 80 characters'
+    const id = agentId(key)
     let a = this.agents.get(id)
     if (m.leave) {
       if (!a) return null
@@ -51,7 +58,7 @@ export class WebhookAdapter {
     if (!a) {
       a = { id, task: null, label: '' }
       this.agents.set(id, a)
-      this.emit({ type: 'agent.spawned', agentId: id, name: clip(m.name, 16) || this.pickName(), role: clip(m.role, 40) || undefined })
+      this.emit({ type: 'agent.spawned', agentId: id, name: clip(m.name, 16) || this.pickName(), role: clip(m.role, 40) || undefined, source: m.source ?? 'http', crew: m.crew === undefined ? undefined : agentId(m.crew), project: m.project })
     }
     const station = STATION_KINDS.includes(m.station) ? m.station : undefined
     if (m.task) {

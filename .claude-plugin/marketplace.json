@@ -4,6 +4,7 @@
     "name": "bloobies.ai",
     "url": "https://bloobies.ai"
   },
+  "description": "The bloobies plugin: your Claude Code agents as a live crew at bloobies.ai.",
   "plugins": [
     {
       "name": "bloobies",

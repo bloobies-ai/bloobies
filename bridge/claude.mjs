@@ -233,6 +233,7 @@ export class ClaudeAdapter {
     if (!s.lead) {
       const id = `cc-${s.id.slice(0, 8)}`
       const project = path.basename(String(s.cwd || '')) || 'session'
+      s.project = clip(project, 80)
       s.lead = this.spawn(s, id, null, clip(`lead · ${project}`, 40), true)
     }
     return s.lead
@@ -282,7 +283,7 @@ export class ClaudeAdapter {
       transcript: null,
     }
     this.agents.set(id, a)
-    this.emit({ type: 'agent.spawned', agentId: id, name: a.name, lead: lead || undefined, role })
+    this.emit({ type: 'agent.spawned', agentId: id, name: a.name, lead: lead || undefined, role, source: 'claude', crew: lead ? undefined : s.lead?.id, project: s.project })
     return a
   }
 

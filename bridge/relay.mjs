@@ -45,7 +45,7 @@ export class Sanitizer {
     const k = (v) => this.id('t', v)
     switch (e.type) {
       case 'agent.spawned':
-        return { type: e.type, t, agentId: a(e.agentId), name: text(e.name, 16) || 'Bloobie', lead: !!e.lead, ...(e.role && !e.lead ? { role: text(e.role, 24) } : {}) } // (a lead's role names your project folder: never sent)
+        return { type: e.type, t, agentId: a(e.agentId), name: text(e.name, 16) || 'Bloobie', lead: !!e.lead, ...(/^[a-z0-9-]{1,24}$/.test(e.source) ? { source: e.source } : {}), ...(e.crew ? { crew: a(e.crew) } : {}), ...(e.project && e.role && !e.lead ? { project: text(e.project, 80) } : {}), ...(e.role && !e.lead ? { role: text(e.role, 24) } : {}) } // (a lead's role names your project folder: never sent)
       case 'agent.retired':
       case 'agent.idle':
         return { type: e.type, t, agentId: a(e.agentId) }
@@ -112,6 +112,7 @@ export function coalesce(events) {
 }
 
 const CHUNK = 400 // events per broadcast: well under the free plan's 256 KB payload
+const RELINK_MS = 10 * 60_000 // how long before this computer asks to link again
 
 /**
  * Start the uplink. Quiet and best-effort: if anything fails it retries later, and the local bridge works regardless.
@@ -162,13 +163,14 @@ export function startRelay({ site, dir, listen, snapshot, open = () => {}, log =
 
   // ---------------------------------------------------------------------------------------- linking, once
   const link = async () => {
-    // open the browser at most once a day, however often sessions start
+    // open the browser at most once an hour, however often sessions start (a tab that was closed, or a button never
+    // clicked, must not leave this computer unlinked all day)
     let recent = false
     try {
-      recent = Date.now() - fs.statSync(openedFile).mtimeMs < 24 * 3600_000
+      recent = Date.now() - fs.statSync(openedFile).mtimeMs < 3600_000
     } catch {}
     if (recent) {
-      log('relay: not linked yet (bloobies.ai asked today; it asks again tomorrow)')
+      log('relay: not linked yet (bloobies.ai asked in the last hour; it asks again after that)')
       return false
     }
     const r = await fetch(`${site}/api/link`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ start: true, os: process.platform }) })
@@ -237,10 +239,17 @@ export function startRelay({ site, dir, listen, snapshot, open = () => {}, log =
     try {
       t = await token()
       if (!t && !stopped) {
-        if (!(await link())) return log('relay: not linked; the world stays on the local bridge')
+        if (!(await link())) {
+          log('relay: not linked; the world stays on the local bridge (it asks again in ten minutes)')
+          later(RELINK_MS, connect)
+          return
+        }
         t = await token()
       }
-      if (!t) return
+      if (!t) {
+        later(RELINK_MS, connect)
+        return
+      }
     } catch (err) {
       if (err?.off) return log(`relay: ${err.message}; the world stays on the local bridge`)
       log(`relay: ${err?.message ?? err}; retrying`)
@@ -251,6 +260,7 @@ export function startRelay({ site, dir, listen, snapshot, open = () => {}, log =
     topic = t.topic
     const url = `${t.url.replace(/^http/, 'ws')}/realtime/v1/websocket?apikey=${encodeURIComponent(t.anonKey)}&vsn=1.0.0`
     ws = new WebSocketImpl(url)
+    const mine = ws // (this attempt's socket: a timer left from an older one must not touch the new one)
     const me = `machine-${randomBytes(4).toString('hex')}`
     ws.onopen = () => {
       ws.send(
@@ -301,6 +311,8 @@ export function startRelay({ site, dir, listen, snapshot, open = () => {}, log =
         if (watching) sendSnapshot()
       } else if (msg.event === 'phx_error' || (msg.event === 'system' && msg.payload?.status === 'error')) {
         log(`relay: channel error ${JSON.stringify(msg.payload ?? {}).slice(0, 120)}`)
+        // a cut-off channel (an expired token, say) never comes back by itself: start over with a fresh one
+        ws?.close()
       }
     }
     ws.onclose = () => {
@@ -313,13 +325,19 @@ export function startRelay({ site, dir, listen, snapshot, open = () => {}, log =
       wait = Math.min(wait * 2, 60_000)
     }
     ws.onerror = () => {}
-    // a fresh token before this one runs out
-    later(Math.max(60_000, t.exp - Date.now() - 5 * 60_000), async () => {
-      try {
-        const n = await token()
-        if (n && send('access_token', { access_token: n.token })) t.exp = n.exp
-      } catch {}
-    })
+    // a fresh token before this one runs out, then again before that one does (a one-hour token, so this has to
+    // keep going: when it stops the channel is cut off and the page goes quiet)
+    const renew = () => {
+      later(Math.max(60_000, t.exp - Date.now() - 5 * 60_000), async () => {
+        if (stopped || !ws || ws !== mine) return
+        try {
+          const n = await token()
+          if (n && send('access_token', { access_token: n.token })) t.exp = n.exp
+        } catch {}
+        renew()
+      })
+    }
+    renew()
   }
 
   // ------------------------------------------------------------------------------ events in, batches out

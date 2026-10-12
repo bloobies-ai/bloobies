@@ -316,7 +316,7 @@ export class Runs {
       run.leadId = this.claude.adopt(run.sid, folder).id
     } else {
       run.leadId = `${program === 'codex' ? 'cx' : 'cu'}-${run.id}`
-      run.agent = new StreamAgent({ id: run.leadId, name: this.pickName(), role: `${TITLES[program]} · ${path.basename(folder)}`, emit: this.publish, now: this.now, cwd: folder })
+      run.agent = new StreamAgent({ id: run.leadId, name: this.pickName(), source: program, role: `${TITLES[program]} · ${path.basename(folder)}`, emit: this.publish, now: this.now, cwd: folder })
     }
     this.runs.set(run.id, run)
     this.remember(folder)

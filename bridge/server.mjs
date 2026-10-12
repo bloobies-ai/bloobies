@@ -13,6 +13,7 @@ import path from 'node:path'
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { accept } from './ws.mjs'
 import { ClaudeAdapter } from './claude.mjs'
+import { startTranscriptWatch } from './transcripts.mjs'
 import { Tracker } from './tracker.mjs'
 import { readUsage } from './usage.mjs'
 import { readLimits } from './limits.mjs'
@@ -69,7 +70,7 @@ const same = (a, b) => {
  *                               the page's real Origin, so only that site's pages get in (and the hosted world can
  *                               find the bridge by itself). Loopback pages and scripts still need the token.
  */
-export function startBridge({ port = 5318, token = randomBytes(12).toString('base64url'), dist, log = () => {}, verbose = false, now, later, programs = findPrograms(), folders = [process.cwd()], home, origins = [] } = {}) {
+export function startBridge({ port = 5318, token = randomBytes(12).toString('base64url'), dist, log = () => {}, verbose = false, now, later, programs = findPrograms(), folders = [process.cwd()], home, origins = [], transcripts = null } = {}) {
   const peers = new Set()
   const tracker = new Tracker()
   let events = 0
@@ -115,6 +116,9 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
     ...(now && { now }),
     ...(home && { dir: home }),
   })
+
+  // Sessions already running (no plugin hooks loaded) are followed from the transcripts Claude Code writes (transcripts.mjs)
+  const watch = transcripts ? startTranscriptWatch({ handle: (p) => { if (!runs.ownsSession(p.session_id)) claude.handle(p) }, log, ...(typeof transcripts === 'string' && { root: transcripts }), ...(now && { now }) }) : null
 
   /** A command from the page. Only a page holding the token may direct: a watch-only page is told no. */
   const command = (peer, raw) => {
@@ -205,6 +209,7 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
       try {
         if (url.pathname === '/hook') {
           // (a launched run's hooks also arrive here through the person's installed hooks: it already has its own)
+          watch?.seen(data?.session_id)
           if (!runs.ownsSession(data?.session_id)) claude.handle(data)
         } else for (const e of Array.isArray(data) ? data : [data]) publish({ t: Date.now(), ...e })
       } catch (err) {
@@ -300,6 +305,7 @@ export function startBridge({ port = 5318, token = randomBytes(12).toString('bas
           new Promise((done) => {
             clearInterval(ping)
             clearInterval(limitsTimer)
+            watch?.close()
             runs.closeAll()
             for (const p of peers) p.close()
             server.close(() => done())

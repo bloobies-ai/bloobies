@@ -8,6 +8,8 @@
 // Options: --port N (default 5318), --dev N (also print a link for the Vite dev server on port N), --open,
 // --verbose (log each event's type, never its contents), --folder D (offer D in the launch form; repeatable),
 // --claude P / --codex P / --cursor P (start that program file instead of the one found on this machine),
+// Sessions that were already running when the bridge started are followed from the transcripts Claude Code
+// writes, so they show up in the world too (--no-follow-sessions leaves them out).
 // --origin URL (also let the https page at URL open the stream, e.g. the reach probe; repeatable, or
 // BLOOBIES_ORIGIN=a,b). https://bloobies.ai is always allowed unless --no-hosted. --idle-exit MIN (stop after MIN
 // minutes with no agent and no page: the Claude Code plugin starts the bridge this way, and starts it again).
@@ -68,7 +70,7 @@ if (cmd === 'mcp') {
     }
     return u.origin
   })
-  const bridge = await startBridge({ port, dist, programs, folders, verbose: flag('verbose'), origins, log: (l) => console.log(`  · ${l}`) }).catch((err) => {
+  const bridge = await startBridge({ port, dist, programs, folders, verbose: flag('verbose'), origins, transcripts: flag('no-follow-sessions') ? null : true, log: (l) => console.log(`  · ${l}`) }).catch((err) => {
     console.error(err.code === 'EADDRINUSE' ? `Port ${port} is taken (another bridge?). Try --port ${port + 1}.` : err.message)
     process.exit(1)
   })

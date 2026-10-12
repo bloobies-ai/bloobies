@@ -13,7 +13,7 @@ function check(v, s) {
   if (s.enum) return s.enum.includes(v)
   switch (s.type) {
     case 'string':
-      return typeof v === 'string' && v.length >= (s.minLength ?? 0) && v.length <= (s.maxLength ?? Infinity)
+      return typeof v === 'string' && v.length >= (s.minLength ?? 0) && v.length <= (s.maxLength ?? Infinity) && (!s.pattern || new RegExp(s.pattern).test(v))
     case 'number':
     case 'integer':
       return (

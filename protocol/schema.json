@@ -19,7 +19,10 @@
         "agentId": { "$ref": "#/$defs/id" },
         "name": { "type": "string", "minLength": 1, "maxLength": 16 },
         "lead": { "type": "boolean" },
-        "role": { "type": "string", "maxLength": 40 }
+        "role": { "type": "string", "maxLength": 40 },
+        "source": { "type": "string", "pattern": "^[a-z0-9-]{1,24}$", "description": "What runs the agent (claude, codex, cursor, chatgpt, comfyui, grok, http...): which HQ it goes to." },
+        "crew": { "$ref": "#/$defs/id", "description": "The lead whose crew this agent is in (subagents): it works at its lead's HQ." },
+        "project": { "type": "string", "maxLength": 80, "description": "The project folder's name, for HQ routing by project." }
       },
       "required": ["type", "t", "agentId", "name"]
     },
